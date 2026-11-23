@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-itunes-app" content="app-id=6829828823" id="smart">
+<title>Join a Skurrio game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --cream:#F8F5EE; --navy:#14253A; --blue:#1E5A8A; --coral:#F26B5B; --lime:#B6D957; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--cream); color:var(--navy); font-family:"DM Sans",system-ui,sans-serif;
+         min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 16px; }
+  main { width:100%; max-width:420px; text-align:center; }
+  h1 { font-family:"Lilita One",system-ui,sans-serif; font-weight:400; color:var(--blue); font-size:34px; margin:8px 0 4px; }
+  .code { font-family:"Lilita One",system-ui,sans-serif; font-size:48px; letter-spacing:2px; color:var(--navy);
+          background:#fff; border-radius:18px; padding:14px 8px; margin:16px 0 8px; }
+  p { font-size:16px; line-height:1.45; margin:8px 0; }
+  .muted { color:rgba(20,37,58,.7); font-size:14px; }
+  .btn { display:block; width:100%; padding:16px; border-radius:16px; font-family:"Lilita One",system-ui,sans-serif;
+         font-size:20px; text-decoration:none; margin:12px 0; }
+  .primary { background:var(--coral); color:#fff; }
+  .store { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+  .soon { background:#fff; border-radius:16px; padding:14px; margin:12px 0; }
+  .hide { display:none; }
+  .logo { width:140px; height:auto; }
+  .tag { font-family:"Lilita One",system-ui,sans-serif; color:var(--coral); margin-top:24px; }
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="https://images.squarespace-cdn.com/content/v1/6ae927edf1aa4c30d4b0c8b8/3a69514b-582b-45d8-8b4f-e8cf94add072/skurrio-patch-logo-transparent.png?format=500w" alt="Skurrio">
+  <h1 id="title">Join a Skurrio game</h1>
+  <div id="code" class="code hide"></div>
+  <p id="lead">Open Skurrio, tap Join a game and enter the code from your host.</p>
+
+  <a id="open" class="btn primary" href="skurrio://">Open in Skurrio</a>
+
+  <div id="get">
+    <p class="muted">Don't have Skurrio yet? Get it, then come back to this link or type the code.</p>
+    <a id="ios" class="btn store" href="https://apps.apple.com/app/id6829828823">Get Skurrio on the App Store</a>
+    <a id="play" class="btn store hide" href="https://play.google.com/store/apps/details?id=com.andreawilson.skurrio">Get Skurrio on Google Play</a>
+    <div id="soon" class="soon"><p><strong>On Android?</strong> Skurrio is coming to Google Play very soon. For now, join on an iPhone with your team.</p></div>
+  </div>
+
+  <p class="tag">Driving each other nuts.</p>
+</main>
+<script>
+(function () {
+  // Switch to true once Skurrio is live on Google Play.
+  var playLive = false;
+  var PLAY = "https://play.google.com/store/apps/details?id=com.andreawilson.skurrio";
+  var params = new URLSearchParams(location.search);
+  var raw = (params.get("code") || location.pathname.split("/").filter(Boolean).pop() || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  var code = raw.length === 6 ? raw.slice(0, 3) + "-" + raw.slice(3) : "";
+  var app = code ? "skurrio://join?code=" + code : "skurrio://";
+  if (code) {
+    document.title = "Join a Skurrio game · " + code;
+    document.getElementById("title").textContent = "You're invited!";
+    var box = document.getElementById("code");
+    box.textContent = code; box.classList.remove("hide");
+    document.getElementById("lead").textContent = "Your host is waiting. Open Skurrio and you'll land on Join with this code filled in.";
+    document.getElementById("smart").setAttribute("content", "app-id=6829828823, app-argument=" + app);
+  }
+  var open = document.getElementById("open");
+  open.href = app;
+  if (playLive) { document.getElementById("play").classList.remove("hide"); document.getElementById("soon").classList.add("hide"); }
+  var ua = navigator.userAgent || "";
+  var android = /Android/i.test(ua);
+  var ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (android) {
+    document.getElementById("ios").classList.add("hide");
+    var here = location.origin + "/?code=" + encodeURIComponent(code) + "&tried=1";
+    var fallback = playLive ? PLAY : here;
+    var intent = "intent://join" + (code ? "?code=" + encodeURIComponent(code) : "") +
+      "#Intent;scheme=skurrio;package=com.andreawilson.skurrio;S.browser_fallback_url=" + encodeURIComponent(fallback) + ";end";
+    open.href = intent;
+    // Straight into the app when it's installed; otherwise Android opens the fallback.
+    if (code && !params.get("tried")) location.replace(intent);
+  } else if (ios) {
+    document.getElementById("play").classList.add("hide");
+    document.getElementById("soon").classList.add("hide");
+  }
+})();
+</script>
+</body>
+</html>
